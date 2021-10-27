@@ -3,5 +3,11 @@
             [tcg.core :refer :all]))
 
 (deftest tcg
+
+  (testing "test a test !"
+    (is (= 1 1)))
+
   (testing "begin a game"
-    (is (= 1 1))))
+    (let [a 1
+          b 1]
+      (is (= a b)))))
