@@ -8,7 +8,7 @@
 
 (defn applyEvts
   [events]
-  (class {}))
+  {:activePlayer :Player1 :opponent :Player2})
 
 (defn startGame [state cmd] (let [player1Deck (:player1Deck cmd)
                                   player2Deck (:player2Deck cmd)
@@ -29,8 +29,11 @@
                                {:evt :ManaSlotsFilled :player :Player1}
                                {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card4}]))
 
-(defn playCard [state cmd] [{:evt :CardPlayed :player :Player1 :card 1}
-                            {:evt :HealthLost :player :Player2}])
+(defn playCard [state cmd] (let [playedCard (:card cmd)
+                                 activePlayer (:activePlayer state)
+                                 opponent (:opponent state)]
+                             [{:evt :CardPlayed :player activePlayer :card playedCard}
+                              {:evt :HealthLost :player opponent}]))
 
 (defn decide
   [state cmd]
