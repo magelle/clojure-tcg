@@ -7,10 +7,17 @@
   (testing "test a test !"
     (is (= 1 1)))
 
-  (testing "apply"
-    (is (apply []) {}))
-
   (testing "begin a game"
     (is (=
-         (receive [] (class {:cmd "StartGame" :g 1}))
-         [(class {:evt "GameStarted"})]))))
+         (receive [] {:cmd "StartGame"
+                      :player1Deck []
+                      :player2Deck []})
+         [{:evt "GameStarted"
+           :player1Deck []
+           :player2Deck []}
+          {:evt "PlayerPickedACard" :player "Player 1"}
+          {:evt "PlayerPickedACard" :player "Player 1"}
+          {:evt "PlayerPickedACard" :player "Player 1"}
+          {:evt "PlayerPickedACard" :player "Player 2"}
+          {:evt "PlayerPickedACard" :player "Player 2"}
+          {:evt "PlayerPickedACard" :player "Player 2"}]))))

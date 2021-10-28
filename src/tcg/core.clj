@@ -6,14 +6,22 @@
   [& args]
   (println "Hello, World!"))
 
-(defn apply
+(defn applyEvts
   [events]
   (class {}))
 
 (defn decide
   [state command]
-  [(class {:evt "GameStarted"})])
+  [{:evt "GameStarted"
+    :player1Deck []
+    :player2Deck []}
+   {:evt "PlayerPickedACard" :player "Player 1"}
+   {:evt "PlayerPickedACard" :player "Player 1"}
+   {:evt "PlayerPickedACard" :player "Player 1"}
+   {:evt "PlayerPickedACard" :player "Player 2"}
+   {:evt "PlayerPickedACard" :player "Player 2"}
+   {:evt "PlayerPickedACard" :player "Player 2"}])
 
 (defn receive
   [events command]
-  (decide (apply events) command))
+  (decide (applyEvts events) command))
