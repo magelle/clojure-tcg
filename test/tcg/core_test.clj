@@ -7,8 +7,10 @@
   (testing "test a test !"
     (is (= 1 1)))
 
-(testing "apply"
-  (is (apply []) {}))
+  (testing "apply"
+    (is (apply []) {}))
 
   (testing "begin a game"
-      (is (= (receive [] (class {:cmd "StartGame" :g 1})) [(class {:evt "GameStarted"})]))))
+    (is (=
+         (receive [] (class {:cmd "StartGame" :g 1}))
+         [(class {:evt "GameStarted"})]))))
