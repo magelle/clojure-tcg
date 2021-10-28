@@ -22,4 +22,5 @@
           {:evt :PlayerPickedACard :player :Player2 :cardPicked 4}
           {:evt :PlayerPickedACard :player :Player2 :cardPicked 3}
           {:evt :PlayerPickedACard :player :Player2 :cardPicked 2}
-          {:evt :PlayerBecameActive :player :Player1}]))))
+          {:evt :PlayerBecameActive :player :Player1}
+          {:evt :PlayerPickedACard :player :Player1 :cardPicked 3}]))))
