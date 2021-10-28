@@ -27,7 +27,8 @@
    {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card1}
    {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card2}
    {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card3}
-   {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card4}]))
+   {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card4}
+   {:evt :PlayerBecameActive :player :Player1}]))
 
 (defn receive
   [events command]
