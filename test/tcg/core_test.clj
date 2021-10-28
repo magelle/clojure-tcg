@@ -11,4 +11,4 @@
   (is (apply []) {}))
 
   (testing "begin a game"
-      (is (= (receive [] (class {:cmd "StartGame" :g 1})) ["GameStarted"]))))
+      (is (= (receive [] (class {:cmd "StartGame" :g 1})) [(class {:evt "GameStarted"})]))))

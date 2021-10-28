@@ -12,7 +12,7 @@
 
 (defn decide
   [state command]
-  ["GameStarted"])
+  [(class {:evt "GameStarted"})])
 
 (defn receive
   [events command]
