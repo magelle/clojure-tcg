@@ -23,4 +23,6 @@
           {:evt :PlayerPickedACard :player :Player2 :cardPicked 3}
           {:evt :PlayerPickedACard :player :Player2 :cardPicked 2}
           {:evt :PlayerBecameActive :player :Player1}
+          {:evt :ReceivedManaSlot :player :Player1}
+          {:evt :ManaSlotsFilled :player :Player1}
           {:evt :PlayerPickedACard :player :Player1 :cardPicked 3}]))))
