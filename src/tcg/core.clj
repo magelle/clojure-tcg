@@ -20,7 +20,8 @@
    {:evt "PlayerPickedACard" :player "Player 1" :cardPicked 2}
    {:evt "PlayerPickedACard" :player "Player 2" :cardPicked 5}
    {:evt "PlayerPickedACard" :player "Player 2" :cardPicked 4}
-   {:evt "PlayerPickedACard" :player "Player 2" :cardPicked 3}])
+   {:evt "PlayerPickedACard" :player "Player 2" :cardPicked 3}
+   {:evt "PlayerPickedACard" :player "Player 2" :cardPicked 2}])
 
 (defn receive
   [events command]
