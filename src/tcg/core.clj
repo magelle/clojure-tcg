@@ -11,10 +11,10 @@
   (class {}))
 
 (defn decide
-  [state command]
+  [state cmd]
   [{:evt "GameStarted"
-    :player1Deck []
-    :player2Deck []}
+    :player1Deck (:player1Deck cmd)
+    :player2Deck (:player2Deck cmd)}
    {:evt "PlayerPickedACard" :player "Player 1"}
    {:evt "PlayerPickedACard" :player "Player 1"}
    {:evt "PlayerPickedACard" :player "Player 1"}
