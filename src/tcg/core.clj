@@ -35,10 +35,10 @@
                                  activePlayer (:activePlayer state)
                                  activePlayerMana (:activePlayerMana state)
                                  opponent (:opponent state)]
-                             (if (>= activePlayerMana playCard))
+                             (if (>= activePlayerMana playedCard)
                              [{:evt :CardPlayed :player activePlayer :card playedCard}
                               {:evt :HealthLost :player opponent}]
-                             []))
+                             [])))
 
 (defn decide
   [state cmd]
