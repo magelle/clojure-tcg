@@ -8,7 +8,9 @@
 
 (defn applyEvts
   [events]
-  {:activePlayer :Player1 :opponent :Player2})
+  {:activePlayer :Player1
+   :activePlayerMana 1
+   :opponent :Player2})
 
 (defn startGame [state cmd] (let [player1Deck (:player1Deck cmd)
                                   player2Deck (:player2Deck cmd)
@@ -31,9 +33,12 @@
 
 (defn playCard [state cmd] (let [playedCard (:card cmd)
                                  activePlayer (:activePlayer state)
+                                 activePlayerMana (:activePlayerMana state)
                                  opponent (:opponent state)]
+                             (if (>= activePlayerMana playCard))
                              [{:evt :CardPlayed :player activePlayer :card playedCard}
-                              {:evt :HealthLost :player opponent}]))
+                              {:evt :HealthLost :player opponent}]
+                             []))
 
 (defn decide
   [state cmd]
