@@ -48,4 +48,15 @@
                    {:evt :PlayerBecameActive :player :Player1}
                    {:evt :ReceivedManaSlot :player :Player1}
                    {:evt :ManaSlotsFilled :player :Player1}] {:cmd :PlayCard :card 2})
-         []))))
+         [])))
+
+  (testing "Can end a turn"
+    (is (=
+         (receive [{:evt :GameStarted
+                    :player1Deck [0 1 2 3 4 5]
+                    :player2Deck [5 4 3 2 1 0]}] {:cmd :EndTurn})
+         [{:evt :PlayerEndedTurn :player :Player1}
+          {:evt :PlayerBecameActive :player :Player2}
+          {:evt :ReceivedManaSlot :player :Player2}
+          {:evt :ManaSlotsFilled :player :Player2}
+          {:evt :PlayerPickedACard :player :Player2 :cardPicked 5}]))))
