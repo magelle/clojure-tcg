@@ -80,8 +80,7 @@
         playerState (playerToUpdate state)
         actualHealth (:health playerState)
         newHealth (dec actualHealth)
-        newState (assoc playerState :health newHealth)
-        ]
+        newState (assoc playerState :health newHealth)]
     (assoc state playerToUpdate newState)))
 
 (defn applyEvt [state evt]
