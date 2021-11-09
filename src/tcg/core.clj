@@ -6,52 +6,128 @@
   [& args]
   (println "Hello, World!"))
 
-(defn applyEvts
-  [events]
+(defn removeFirst [list remove]
+  (let [[n m] (split-with (partial not= remove) list)]
+    (concat n (rest m))))
+
+(def initialState
   {:activePlayer :Player1
-   :activePlayerState {:mana 1}
-   :opponentState {:deck [5]}
+   :activePlayerState {:mana 0 :manaSlots 0 :hand [] :deck []}
+   :opponentState {:mana 0 :manaSlots 0 :hand [] :deck []}
    :opponent :Player2})
 
-(defn startGame [state cmd] (let [player1Deck (:player1Deck cmd)
-                                  player2Deck (:player2Deck cmd)
-                                  [player1Card1 player1Card2 player1Card3, player1Card4] player1Deck
-                                  [player2Card1 player2Card2 player2Card3, player2Card4] player2Deck]
-                              [{:evt :GameStarted
-                                :player1Deck player1Deck
-                                :player2Deck player2Deck}
-                               {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card1}
-                               {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card2}
-                               {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card3}
-                               {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card1}
-                               {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card2}
-                               {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card3}
-                               {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card4}
-                               {:evt :PlayerBecameActive :player :Player1}
-                               {:evt :ReceivedManaSlot :player :Player1}
-                               {:evt :ManaSlotsFilled :player :Player1}
-                               {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card4}]))
+(defn gameStarted [state evt]
+  (let [activePlayerDeck (:player1Deck evt)
+        opponentDeck (:player2Deck evt)
+        activePlayerState (:activePlayerState state)
+        opponentState (:opponentState state)
+        activePlayerState (assoc activePlayerState :deck activePlayerDeck)
+        opponentState (assoc opponentState :deck opponentDeck)]
+    (-> state
+        (assoc :activePlayerState activePlayerState)
+        (assoc :opponentState opponentState))))
 
-(defn playCard [state cmd] (let [playedCard (:card cmd)
-                                 activePlayer (:activePlayer state)
-                                 activePlayerMana (:mana (:activePlayerState state))
-                                 opponent (:opponent state)]
-                             (if (>= activePlayerMana playedCard)
-                               [{:evt :CardPlayed :player activePlayer :card playedCard}
-                                {:evt :HealthLost :player opponent}]
-                               [])))
+(defn manaSlotsFilled [state evt]
+  (let [activePlayerState (:activePlayerState state)
+        manaSlots (:manaSlots activePlayerState)
+        mana (:mana activePlayerState)
+        newActivePlayerState (assoc activePlayerState :mana manaSlots)]
+    (assoc state :activePlayerState newActivePlayerState)))
 
-(defn endTurn [state cmd] (let [
-                                activePlayer (:activePlayer state)
-                                opponent (:opponent state)
-                                player2Deck (:deck (:opponentState state))
-                                [player2Card1] player2Deck
-]
-                            [{:evt :PlayerEndedTurn :player activePlayer}
-                           {:evt :PlayerBecameActive :player opponent}
-                           {:evt :ReceivedManaSlot :player opponent}
-                           {:evt :ManaSlotsFilled :player opponent}
-                           {:evt :PlayerPickedACard :player opponent :cardPicked player2Card1}]))
+(defn playerPickedACard [state evt]
+  (let [cardPicked (:cardPicked evt)
+        player (:player evt)
+        playerState (if (= (:activePlayer state) player)  (:activePlayerState state)    (:opponentState state))
+        deck (:deck playerState)
+        newDeck (removeFirst deck cardPicked)
+        newPlayerState (-> playerState
+                           (assoc :deck newDeck)
+                           (assoc :hand [cardPicked]))]
+    (assoc state (if (= (:activePlayer state) player) :activePlayerState :opponentState) newPlayerState)))
+
+(defn invertPlayers [state]
+  (let [activePlayer (:activePlayer state)
+        opponent (:opponent state)
+        activePlayerState (:activePlayerState state)
+        opponentState (:opponentState state)]
+    (-> state
+        (assoc :activePlayer opponent)
+        (assoc :activePlayerState opponentState)
+        (assoc :opponent activePlayer)
+        (assoc :opponentState activePlayerState))))
+
+(defn playerBecameActive [state evt]
+  (let [newActivePlayer (:player evt)
+        doesChange (not= newActivePlayer (:activePlayer state))]
+    (if doesChange (invertPlayers state) state)))
+
+(defn receivedManaSlot [state evt]
+  (let [activePlayerState (:activePlayerState state)
+        manaSlots (:manaSlots activePlayerState)
+        newManaSlots (+ manaSlots 1)
+        newActivePlayer (assoc activePlayerState :manaSlots newManaSlots)]
+    (assoc state :activePlayerState newActivePlayer)))
+
+(defn manaSlotsFilled [state evt]
+  (let [activePlayerState (:activePlayerState state)
+        manaSlots (:manaSlots activePlayerState)
+        newActivePlayer (assoc activePlayerState :mana manaSlots)]
+    (assoc state :activePlayerState newActivePlayer)))
+
+(defn applyEvt [state evt]
+  (cond
+    (= (:evt evt) :GameStarted) (gameStarted state evt)
+    (= (:evt evt) :PlayerBecameActive) (playerBecameActive state evt)
+    (= (:evt evt) :ManaSlotsFilled) (manaSlotsFilled state, evt)
+    (= (:evt evt) :ReceivedManaSlot) (receivedManaSlot state evt)
+    (= (:evt evt) :ManaSlotsFilled) (manaSlotsFilled state evt)
+    (= (:evt evt) :PlayerPickedACard) (playerPickedACard state, evt)
+    :else state))
+
+(defn applyEvts
+  [events]
+  (reduce applyEvt initialState events))
+
+(defn startGame [state cmd]
+  (let [player1Deck (:player1Deck cmd)
+        player2Deck (:player2Deck cmd)
+        [player1Card1 player1Card2 player1Card3, player1Card4] player1Deck
+        [player2Card1 player2Card2 player2Card3, player2Card4] player2Deck]
+    [{:evt :GameStarted
+      :player1Deck player1Deck
+      :player2Deck player2Deck}
+     {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card1}
+     {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card2}
+     {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card3}
+     {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card1}
+     {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card2}
+     {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card3}
+     {:evt :PlayerPickedACard :player :Player2 :cardPicked player2Card4}
+     {:evt :PlayerBecameActive :player :Player1}
+     {:evt :ReceivedManaSlot :player :Player1}
+     {:evt :ManaSlotsFilled :player :Player1}
+     {:evt :PlayerPickedACard :player :Player1 :cardPicked player1Card4}]))
+
+(defn playCard [state cmd]
+  (let [playedCard (:card cmd)
+        activePlayer (:activePlayer state)
+        activePlayerMana (:mana (:activePlayerState state))
+        opponent (:opponent state)]
+    (if (>= activePlayerMana playedCard)
+      [{:evt :CardPlayed :player activePlayer :card playedCard}
+       {:evt :HealthLost :player opponent}]
+      [])))
+
+(defn endTurn [state cmd]
+  (let [activePlayer (:activePlayer state)
+        opponent (:opponent state)
+        player2Deck (:deck (:opponentState state))
+        [player2Card1] player2Deck]
+    [{:evt :PlayerEndedTurn :player activePlayer}
+     {:evt :PlayerBecameActive :player opponent}
+     {:evt :ReceivedManaSlot :player opponent}
+     {:evt :ManaSlotsFilled :player opponent}
+     {:evt :PlayerPickedACard :player opponent :cardPicked player2Card1}]))
 
 (defn decide
   [state cmd]
