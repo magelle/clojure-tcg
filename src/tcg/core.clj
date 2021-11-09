@@ -12,8 +12,8 @@
 
 (def initialState
   {:activePlayer :Player1
-   :activePlayerState {:mana 0 :manaSlots 0 :hand [] :deck []}
-   :opponentState {:mana 0 :manaSlots 0 :hand [] :deck []}
+   :activePlayerState {:mana 0 :manaSlots 0 :hand [] :deck [] :health 30}
+   :opponentState {:mana 0 :manaSlots 0 :hand [] :deck [] :health 30}
    :opponent :Player2})
 
 (defn gameStarted [state evt]
@@ -74,6 +74,16 @@
         newActivePlayer (assoc activePlayerState :mana manaSlots)]
     (assoc state :activePlayerState newActivePlayer)))
 
+(defn playerLooseHealth [state evt]
+  (let [player (:player evt)
+        playerToUpdate (if (= (:activePlayer state) player) :activePlayerState :opponentState)
+        playerState (playerToUpdate state)
+        actualHealth (:health playerState)
+        newHealth (dec actualHealth)
+        newState (assoc playerState :health newHealth)
+        ]
+    (assoc state playerToUpdate newState)))
+
 (defn applyEvt [state evt]
   (cond
     (= (:evt evt) :GameStarted) (gameStarted state evt)
@@ -81,7 +91,8 @@
     (= (:evt evt) :ManaSlotsFilled) (manaSlotsFilled state, evt)
     (= (:evt evt) :ReceivedManaSlot) (receivedManaSlot state evt)
     (= (:evt evt) :ManaSlotsFilled) (manaSlotsFilled state evt)
-    (= (:evt evt) :PlayerPickedACard) (playerPickedACard state, evt)
+    (= (:evt evt) :PlayerPickedACard) (playerPickedACard state evt)
+    (= (:evt evt) :HealthLost) (playerLooseHealth state evt)
     :else state))
 
 (defn applyEvts
@@ -112,11 +123,17 @@
   (let [playedCard (:card cmd)
         activePlayer (:activePlayer state)
         activePlayerMana (:mana (:activePlayerState state))
-        opponent (:opponent state)]
+        opponent (:opponent state)
+        opponentState (:opponentState state)
+        opponentHealth (:health opponentState)]
     (if (>= activePlayerMana playedCard)
-      [{:evt :CardPlayed :player activePlayer :card playedCard}
-       {:evt :HealthLost :player opponent}]
-      [])))
+      (if (= opponentHealth 1)
+        [{:evt :CardPlayed :player activePlayer :card playedCard}
+         {:evt :HealthLost :player opponent}
+         {:evt :WinGame :player activePlayer}]
+        [{:evt :CardPlayed :player activePlayer :card playedCard}
+         {:evt :HealthLost :player opponent}])
+      [{:error "not enough mana"}])))
 
 (defn endTurn [state cmd]
   (let [activePlayer (:activePlayer state)
