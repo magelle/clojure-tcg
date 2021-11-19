@@ -137,13 +137,14 @@
 (defn endTurn [state cmd]
   (let [activePlayer (:activePlayer state)
         opponent (:opponent state)
+        opponentManaSlots (:manaSlots (:opponentState state))
         player2Deck (:deck (:opponentState state))
         [player2Card1] player2Deck]
-    [{:evt :PlayerEndedTurn :player activePlayer}
-     {:evt :PlayerBecameActive :player opponent}
-     {:evt :ReceivedManaSlot :player opponent}
-     {:evt :ManaSlotsFilled :player opponent}
-     {:evt :PlayerPickedACard :player opponent :cardPicked player2Card1}]))
+    (concat
+     (concat [{:evt :PlayerEndedTurn :player activePlayer} {:evt :PlayerBecameActive :player opponent}]
+             (if (< opponentManaSlots 10) [{:evt :ReceivedManaSlot :player opponent}] []))
+     [{:evt :ManaSlotsFilled :player opponent}
+      {:evt :PlayerPickedACard :player opponent :cardPicked player2Card1}])))
 
 (defn decide
   [state cmd]

@@ -86,4 +86,28 @@
                            {:evt :ManaSlotsFilled :player :Player2}] (repeat 29 {:evt :HealthLost :player :Player1})) {:cmd :PlayCard :card 1})
          [{:evt :CardPlayed :player :Player2 :card 1}
           {:evt :HealthLost :player :Player1}
-          {:evt :WinGame :player :Player2}]))))
+          {:evt :WinGame :player :Player2}])))
+
+  (testing "A player can't get more than 10 mana slots"
+    (is (=
+         (receive [{:evt :GameStarted
+                            :player1Deck [11 1 2 3 4 5]
+                            :player2Deck [5 4 1 2 3 0]}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :ReceivedManaSlot :player :Player1}
+                            {:evt :PlayerBecameActive :player :Player2}]
+                            {:cmd :EndTurn})
+         [
+          {:evt :PlayerEndedTurn :player :Player2}
+          {:evt :PlayerBecameActive :player :Player1}
+          {:evt :ManaSlotsFilled :player :Player1}
+          {:evt :PlayerPickedACard :player :Player1 :cardPicked 11}
+         ]))))
